@@ -1,10 +1,10 @@
-"""并发控制工具（优化版）
+"""Concurrency control utilities (optimized version)
 
-性能改进：
-1. 动态并发限制（根据系统负载）
-2. 分离不同验证类型的并发控制
-3. 支持更高的并发数
-4. 负载监控和自动调整
+Performance improvements:
+1. Dynamic concurrency limits (based on system load)
+2. Separate concurrency control for different verification types
+3. Support for higher concurrency
+4. Load monitoring and automatic adjustment
 """
 import asyncio
 import logging
@@ -13,39 +13,39 @@ import psutil
 
 logger = logging.getLogger(__name__)
 
-# 动态计算最大并发数
+# Dynamically calculate maximum concurrency
 def _calculate_max_concurrency() -> int:
-    """根据系统资源计算最大并发数"""
+    """Calculate maximum concurrency based on system resources"""
     try:
         cpu_count = psutil.cpu_count() or 4
         memory_gb = psutil.virtual_memory().total / (1024 ** 3)
         
-        # 基于 CPU 和内存计算
-        # 每个 CPU 核心支持 3-5 个并发任务
-        # 每 GB 内存支持 2 个并发任务
+        # Calculate based on CPU and memory
+        # Each CPU core supports 3-5 concurrent tasks
+        # Each GB of memory supports 2 concurrent tasks
         cpu_based = cpu_count * 4
         memory_based = int(memory_gb * 2)
         
-        # 取两者的最小值，并设置上下限
+        # Take the minimum of both, and set upper and lower limits
         max_concurrent = min(cpu_based, memory_based)
-        max_concurrent = max(10, min(max_concurrent, 100))  # 10-100 之间
+        max_concurrent = max(10, min(max_concurrent, 100))  # Between 10-100
         
         logger.info(
-            f"系统资源: CPU={cpu_count}, Memory={memory_gb:.1f}GB, "
-            f"计算并发数={max_concurrent}"
+            f"System resources: CPU={cpu_count}, Memory={memory_gb:.1f}GB, "
+            f"Calculated concurrency={max_concurrent}"
         )
         
         return max_concurrent
         
     except Exception as e:
-        logger.warning(f"无法获取系统资源信息: {e}, 使用默认值")
-        return 20  # 默认值
+        logger.warning(f"Unable to get system resource info: {e}, using default value")
+        return 20  # Default value
 
-# 计算每种验证类型的并发限制
+# Calculate concurrency limit for each verification type
 _base_concurrency = _calculate_max_concurrency()
 
-# 为不同类型的验证创建独立的信号量
-# 这样可以避免一个类型的验证阻塞其他类型
+# Create independent semaphores for different verification types
+# This prevents one type of verification from blocking others
 _verification_semaphores: Dict[str, asyncio.Semaphore] = {
     "gemini_one_pro": asyncio.Semaphore(_base_concurrency // 5),
     "chatgpt_teacher_k12": asyncio.Semaphore(_base_concurrency // 5),
@@ -56,7 +56,7 @@ _verification_semaphores: Dict[str, asyncio.Semaphore] = {
 
 
 def get_verification_semaphore(verification_type: str) -> asyncio.Semaphore:
-    """获取指定验证类型的信号量
+    """Get semaphore for specified verification type
     
     Args:
         verification_type: 验证类型

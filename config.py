@@ -1,23 +1,23 @@
-"""全局配置文件"""
+"""Global configuration file"""
 import os
 from dotenv import load_dotenv
 
-# 加载 .env 文件
+# Load .env file
 load_dotenv()
 
-# Telegram Bot 配置
+# Telegram Bot configuration
 BOT_TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 CHANNEL_USERNAME = os.getenv("CHANNEL_USERNAME", "pk_oa")
 CHANNEL_URL = os.getenv("CHANNEL_URL", "https://t.me/pk_oa")
 
-# 管理员配置
+# Admin configuration
 ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", "123456789"))
 
-# 积分配置
-VERIFY_COST = 1  # 验证消耗的积分
-CHECKIN_REWARD = 1  # 签到奖励积分
-INVITE_REWARD = 2  # 邀请奖励积分
-REGISTER_REWARD = 1  # 注册奖励积分
+# Points configuration
+VERIFY_COST = 1  # Points cost for verification
+CHECKIN_REWARD = 1  # Check-in reward points
+INVITE_REWARD = 2  # Invitation reward points
+REGISTER_REWARD = 1  # Registration reward points
 
-# 帮助链接
+# Help link
 HELP_NOTION_URL = "https://rhetorical-era-3f3.notion.site/dd78531dbac745af9bbac156b51da9cc"

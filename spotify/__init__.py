@@ -1,1 +1,1 @@
-"""Gemini One Pro SheerID 认证模块"""
+"""Gemini One Pro SheerID verification module"""

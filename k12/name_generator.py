@@ -1,9 +1,9 @@
-"""随机名字生成器"""
+"""Random name generator"""
 import random
 
 
 class NameGenerator:
-    """英文名字生成器"""
+    """English name generator"""
     
     ROOTS = {
         'prefixes': ['Al', 'Bri', 'Car', 'Dan', 'El', 'Fer', 'Gar', 'Har', 'Jes', 'Kar', 
@@ -35,7 +35,7 @@ class NameGenerator:
     
     @classmethod
     def _generate_component(cls, pattern):
-        """根据模式生成名字组件"""
+        """Generate name components based on pattern"""
         components = []
         for part in pattern:
             if part == 'prefix':
@@ -61,16 +61,16 @@ class NameGenerator:
     
     @classmethod
     def _format_name(cls, name):
-        """格式化名字（首字母大写）"""
+        """Format name (capitalize first letter)"""
         return name.capitalize()
     
     @classmethod
     def generate(cls):
         """
-        生成随机英文名字
+        Generate random English name
         
         Returns:
-            dict: 包含 first_name, last_name, full_name
+            dict: Contains first_name, last_name, full_name
         """
         first_name_pattern = random.choice(cls.PATTERNS['first_name'])
         last_name_pattern = random.choice(cls.PATTERNS['last_name'])
@@ -87,10 +87,10 @@ class NameGenerator:
 
 def generate_email():
     """
-    生成随机邮箱（教师使用常见邮箱）
+    Generate random email (teachers use common email)
 
     Returns:
-        str: 邮箱地址
+        str: Email address
     """
     name = NameGenerator.generate()
     first_name = name['first_name'].lower()
@@ -103,10 +103,10 @@ def generate_email():
 
 def generate_birth_date():
     """
-    生成随机生日（教师年龄范围 1970-1990）
+    Generate random birth date (teacher age range 1970-1990)
 
     Returns:
-        str: YYYY-MM-DD 格式的日期
+        str: Date in YYYY-MM-DD format
     """
     year = random.randint(1970, 1990)
     month = str(random.randint(1, 12)).zfill(2)

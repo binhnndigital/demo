@@ -206,7 +206,7 @@ async def verify3_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         )
         return
 
-    # 解析 verificationId
+    # Parse verificationId
     verification_id = SpotifyVerifier.parse_verification_id(url)
     if not verification_id:
         await update.message.reply_text("Invalid SheerID link, please check and try again.")
@@ -217,14 +217,14 @@ async def verify3_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         return
 
     processing_msg = await update.message.reply_text(
-        f"🎵 开始处理 Spotify Student 认证...\n"
+        f"🎵 Starting Spotify Student verification...\n"
         f"Deducted {VERIFY_COST} points\n\n"
-        "📝 正在生成学生信息...\n"
-        "🎨 正在生成学生证 PNG...\n"
-        "📤 正在提交文档..."
+        "📝 Generating student info...\n"
+        "🎨 Generating student ID PNG...\n"
+        "📤 Submitting documents..."
     )
 
-    # 使用信号量控制并发
+    # Use semaphore to control concurrency
     semaphore = get_verification_semaphore("spotify_student")
 
     try:
@@ -241,12 +241,12 @@ async def verify3_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         )
 
         if result["success"]:
-            result_msg = "✅ Spotify 学生认证成功！\n\n"
+            result_msg = "✅ Spotify Student Verification successful!\n\n"
             if result.get("pending"):
-                result_msg += "✨ 文档已提交，等待 SheerID 审核\n"
-                result_msg += "⏱️ 预计审核时间：几分钟内\n\n"
+                result_msg += "✨ Documents submitted, waiting for SheerID review\n"
+                result_msg += "⏱️ Estimated review time: within minutes\n\n"
             if result.get("redirect_url"):
-                result_msg += f"🔗 跳转链接：\n{result['redirect_url']}"
+                result_msg += f"🔗 Redirect link:\n{result['redirect_url']}"
             await processing_msg.edit_text(result_msg)
         else:
             db.add_balance(user_id, VERIFY_COST)
@@ -289,7 +289,7 @@ async def verify4_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         )
         return
 
-    # 解析 externalUserId 或 verificationId
+    # Parse externalUserId or verificationId
     external_user_id = BoltnewVerifier.parse_external_user_id(url)
     verification_id = BoltnewVerifier.parse_verification_id(url)
 
@@ -379,7 +379,7 @@ async def verify4_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
                 f"Note: points have been consumed, no additional fee for later queries"
             )
             
-            # 保存待处理记录
+            # Save pending record
             db.add_verification(
                 user_id,
                 "bolt_teacher",
@@ -485,7 +485,7 @@ async def verify5_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         )
         return
 
-    # 解析 verificationId
+    # Parse verificationId
     verification_id = YouTubeVerifier.parse_verification_id(url)
     if not verification_id:
         await update.message.reply_text("Invalid SheerID link, please check and try again.")
@@ -496,14 +496,14 @@ async def verify5_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         return
 
     processing_msg = await update.message.reply_text(
-        f"📺 开始处理 YouTube Student Premium 认证...\n"
+        f"📺 Starting YouTube Student Premium verification...\n"
         f"Deducted {VERIFY_COST} points\n\n"
-        "📝 正在生成学生信息...\n"
-        "🎨 正在生成学生证 PNG...\n"
-        "📤 正在提交文档..."
+        "📝 Generating student info...\n"
+        "🎨 Generating student ID PNG...\n"
+        "📤 Submitting documents..."
     )
 
-    # 使用信号量控制并发
+    # Use semaphore to control concurrency
     semaphore = get_verification_semaphore("youtube_student")
 
     try:
@@ -520,12 +520,12 @@ async def verify5_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         )
 
         if result["success"]:
-            result_msg = "✅ YouTube Student Premium 认证成功！\n\n"
+            result_msg = "✅ YouTube Student Premium Verification successful！\n\n"
             if result.get("pending"):
-                result_msg += "✨ 文档已提交，等待 SheerID 审核\n"
-                result_msg += "⏱️ 预计审核时间：几分钟内\n\n"
+                result_msg += "✨ Documents submitted, waiting for SheerID review\n"
+                result_msg += "⏱️ Estimated review time: within minutes\n\n"
             if result.get("redirect_url"):
-                result_msg += f"🔗 跳转链接：\n{result['redirect_url']}"
+                result_msg += f"🔗 Redirect link:\n{result['redirect_url']}"
             await processing_msg.edit_text(result_msg)
         else:
             db.add_balance(user_id, VERIFY_COST)
@@ -554,23 +554,23 @@ async def getV4Code_command(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         await update.message.reply_text("Please register first using /start.")
         return
 
-    # 检查是否提供了 verification_id
+    # Check if verification_id is provided
     if not context.args:
         await update.message.reply_text(
-            "使用方法: /getV4Code <verification_id>\n\n"
-            "示例: /getV4Code 6929436b50d7dc18638890d0\n\n"
-            "verification_id 在使用 /verify4 命令后会返回给您。"
+            "Usage: /getV4Code <verification_id>\n\n"
+            "Example: /getV4Code 6929436b50d7dc18638890d0\n\n"
+            "verification_id will be returned to you after using /verify4 command."
         )
         return
 
     verification_id = context.args[0].strip()
 
     processing_msg = await update.message.reply_text(
-        "🔍 正在查询认证码，请稍候..."
+        "🔍 Querying verification code, please wait..."
     )
 
     try:
-        # 查询 SheerID API 获取认证码
+        # Query SheerID API to get verification code
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(
                 f"https://my.sheerid.com/rest/v2/verification/{verification_id}"
@@ -578,8 +578,8 @@ async def getV4Code_command(update: Update, context: ContextTypes.DEFAULT_TYPE, 
 
             if response.status_code != 200:
                 await processing_msg.edit_text(
-                    f"❌ 查询失败，状态码：{response.status_code}\n\n"
-                    "请稍后重试或联系管理员。"
+                    f"❌ Query failed, status code: {response.status_code}\n\n"
+                    "Please try again later or contact administrator."
                 )
                 return
 
@@ -590,30 +590,30 @@ async def getV4Code_command(update: Update, context: ContextTypes.DEFAULT_TYPE, 
 
             if current_step == "success" and reward_code:
                 result_msg = "✅ Verification successful!\n\n"
-                result_msg += f"🎉 认证码：`{reward_code}`\n\n"
+                result_msg += f"🎉 Verification code: `{reward_code}`\n\n"
                 if redirect_url:
                     result_msg += f"Redirect link:\n{redirect_url}"
                 await processing_msg.edit_text(result_msg)
             elif current_step == "pending":
                 await processing_msg.edit_text(
-                    "⏳ 认证仍在审核中，请稍后再试。\n\n"
-                    "通常需要 1-5 分钟，请耐心等待。"
+                    "⏳ Verification still under review, please try again later.\n\n"
+                    "Usually takes 1-5 minutes, please be patient."
                 )
             elif current_step == "error":
                 error_ids = data.get("errorIds", [])
                 await processing_msg.edit_text(
-                    f"❌ 认证失败\n\n"
-                    f"错误信息：{', '.join(error_ids) if error_ids else 'Unknown error'}"
+                    f"❌ Verification failed\n\n"
+                    f"Error message: {', '.join(error_ids) if error_ids else 'Unknown error'}"
                 )
             else:
                 await processing_msg.edit_text(
-                    f"⚠️ 当前状态：{current_step}\n\n"
-                    "认证码尚未生成，请稍后重试。"
+                    f"⚠️ Current status: {current_step}\n\n"
+                    "Verification code not yet generated, please try again later."
                 )
 
     except Exception as e:
         logger.error("Failed to get Bolt.new verification code: %s", e)
         await processing_msg.edit_text(
-            f"❌ 查询过程中出现错误：{str(e)}\n\n"
-            "请稍后重试或联系管理员。"
+            f"❌ Error occurred during query: {str(e)}\n\n"
+            "Please try again later or contact administrator."
         )

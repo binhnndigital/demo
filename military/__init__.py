@@ -1,2 +1,2 @@
-"""ChatGPT 军人 SheerID 认证模块"""
+"""ChatGPT Military SheerID verification module"""
 

@@ -1,1 +1,1 @@
-"""Bolt.new Teacher SheerID 认证模块"""
+"""Bolt.new Teacher SheerID verification module"""

@@ -106,10 +106,10 @@ def get_concurrency_stats() -> Dict[str, Dict[str, int]]:
 
 
 async def monitor_system_load() -> Dict[str, float]:
-    """监控系统负载
+    """Monitor system load
     
     Returns:
-        dict: 系统负载信息
+        dict: System load information
     """
     try:
         cpu_percent = psutil.cpu_percent(interval=0.1)
@@ -121,7 +121,7 @@ async def monitor_system_load() -> Dict[str, float]:
             'concurrency_limit': _base_concurrency,
         }
     except Exception as e:
-        logger.error(f"监控系统负载失败: {e}")
+        logger.error(f"Failed to monitor system load: {e}")
         return {
             'cpu_percent': 0.0,
             'memory_percent': 0.0,
@@ -130,37 +130,37 @@ async def monitor_system_load() -> Dict[str, float]:
 
 
 def adjust_concurrency_limits(multiplier: float = 1.0):
-    """动态调整并发限制
+    """Dynamically adjust concurrency limit
     
     Args:
-        multiplier: 调整倍数（0.5-2.0）
+        multiplier: Adjustment multiplier (0.5-2.0)
     """
     global _verification_semaphores, _base_concurrency
     
-    # 限制倍数范围
+    # Limit multiplier range
     multiplier = max(0.5, min(multiplier, 2.0))
     
     new_base = int(_base_concurrency * multiplier)
-    new_limit = max(5, min(new_base // 3, 50))  # 每种类型 5-50
+    new_limit = max(5, min(new_base // 3, 50))  # 5-50 for each type
     
     logger.info(
-        f"调整并发限制: multiplier={multiplier}, "
+        f"Adjusting concurrency limit: multiplier={multiplier}, "
         f"new_base={new_base}, per_type={new_limit}"
     )
     
-    # 创建新的信号量
+    # Create new semaphores
     for vtype in _verification_semaphores.keys():
         _verification_semaphores[vtype] = asyncio.Semaphore(new_limit)
 
 
-# 负载监控任务
+# Load monitoring task
 _monitor_task = None
 
 async def start_load_monitoring(interval: float = 60.0):
-    """启动负载监控任务
+    """Start load monitoring task
     
     Args:
-        interval: 监控间隔（秒）
+        interval: Monitoring interval (seconds)
     """
     global _monitor_task
     
@@ -177,30 +177,30 @@ async def start_load_monitoring(interval: float = 60.0):
                 memory = load_info['memory_percent']
                 
                 logger.info(
-                    f"系统负载: CPU={cpu:.1f}%, Memory={memory:.1f}%"
+                    f"System load: CPU={cpu:.1f}%, Memory={memory:.1f}%"
                 )
                 
-                # 自动调整并发限制
+                # Automatically adjust concurrency limit
                 if cpu > 80 or memory > 85:
-                    # 负载过高，降低并发
+                    # Load too high, reduce concurrency
                     adjust_concurrency_limits(0.7)
-                    logger.warning("系统负载过高，降低并发限制")
+                    logger.warning("System load too high, reducing concurrency limit")
                 elif cpu < 40 and memory < 60:
-                    # 负载较低，可以提高并发
+                    # Load is low, can increase concurrency
                     adjust_concurrency_limits(1.2)
-                    logger.info("系统负载较低，提高并发限制")
+                    logger.info("System load is low, increasing concurrency limit")
                     
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"负载监控异常: {e}")
+                logger.error(f"Load monitoring error: {e}")
     
     _monitor_task = asyncio.create_task(monitor_loop())
-    logger.info(f"负载监控已启动: interval={interval}s")
+    logger.info(f"Load monitoring started: interval={interval}s")
 
 
 async def stop_load_monitoring():
-    """停止负载监控任务"""
+    """Stop load monitoring task"""
     global _monitor_task
     
     if _monitor_task is not None:
@@ -210,4 +210,4 @@ async def stop_load_monitoring():
         except asyncio.CancelledError:
             pass
         _monitor_task = None
-        logger.info("负载监控已停止")
+        logger.info("Load monitoring stopped")

@@ -1,107 +1,107 @@
-# SheerID 自动认证 Telegram 机器人
+# SheerID Auto-Verification Telegram Bot
 
 ![Stars](https://img.shields.io/github/stars/PastKing/tgbot-verify?style=social)
 ![Forks](https://img.shields.io/github/forks/PastKing/tgbot-verify?style=social)
 ![Issues](https://img.shields.io/github/issues/PastKing/tgbot-verify)
 ![License](https://img.shields.io/github/license/PastKing/tgbot-verify)
 
-> 🤖 自动完成 SheerID 学生/教师认证的 Telegram 机器人
+> 🤖 Automated SheerID Student/Teacher Verification Telegram Bot
 > 
-> 基于 [@auto_sheerid_bot](https://t.me/auto_sheerid_bot) GGBond 的旧版代码改进
+> Based on [@auto_sheerid_bot](https://t.me/auto_sheerid_bot) GGBond's legacy code with improvements
 
 ---
 
-## 📋 项目简介
+## 📋 Overview
 
-这是一个基于 Python 的 Telegram 机器人，可以自动完成多个平台的 SheerID 学生/教师身份认证。机器人自动生成身份信息、创建认证文档并提交到 SheerID 平台，大大简化了认证流程。
+A Python-based Telegram bot that automates SheerID student/teacher identity verification for multiple platforms. The bot automatically generates identity information, creates verification documents, and submits them to the SheerID platform, significantly simplifying the verification process.
 
-> **⚠️ 重要提示**：
+> **⚠️ Important Notice**:
 > 
-> - **Gemini One Pro**、**ChatGPT Teacher K12**、**Spotify Student**、**YouTube Premium Student** 等服务在使用前需要更新各模块配置文件中的 `programId` 等验证资料，具体请参考下方"使用前必读"章节。
-> - 本项目还提供了 **ChatGPT 军人认证**的实现思路和接口文档，详细内容请查看 [`military/README.md`](military/README.md)，用户可根据文档自行集成。
+> - Services such as **Gemini One Pro**, **ChatGPT Teacher K12**, **Spotify Student**, and **YouTube Premium Student** require updating verification data (e.g., `programId`) in each module's configuration file before use. Please refer to the "Must Read Before Use" section below for details.
+> - This project also provides implementation approach and API documentation for **ChatGPT Military verification**. For detailed information, please refer to [`military/README.md`](military/README.md). Users can integrate this based on the documentation.
 
-### 🎯 支持的认证服务
+### 🎯 Supported Services
 
-| 命令 | 服务 | 类型 | 状态 | 说明 |
-|------|------|------|------|------|
-| `/verify` | Gemini One Pro | 教师认证 | ✅ 完整 | Google AI Studio 教育优惠 |
-| `/verify2` | ChatGPT Teacher K12 | 教师认证 | ✅ 完整 | OpenAI ChatGPT 教育优惠 |
-| `/verify3` | Spotify Student | 学生认证 | ✅ 完整 | Spotify 学生订阅优惠 |
-| `/verify4` | Bolt.new Teacher | 教师认证 | ✅ 完整 | Bolt.new 教育优惠（自动获取 code）|
-| `/verify5` | YouTube Premium Student | 学生认证 | ⚠️ 半成品 | YouTube Premium 学生优惠（见下方说明）|
+| Command | Service | Type | Status | Description |
+|---------|---------|------|--------|-------------|
+| `/verify` | Gemini One Pro | Teacher | ✅ Complete | Google AI Studio Education Discount |
+| `/verify2` | ChatGPT Teacher K12 | Teacher | ✅ Complete | OpenAI ChatGPT Education Discount |
+| `/verify3` | Spotify Student | Student | ✅ Complete | Spotify Student Subscription Discount |
+| `/verify4` | Bolt.new Teacher | Teacher | ✅ Complete | Bolt.new Education Discount (Auto code retrieval) |
+| `/verify5` | YouTube Premium Student | Student | ⚠️ Beta | YouTube Premium Student Discount (See notes below) |
 
-> **⚠️ YouTube 认证特别说明**：
+> **⚠️ YouTube Verification Special Notes**:
 > 
-> YouTube 认证功能目前为半成品状态，使用前请仔细阅读 [`youtube/HELP.MD`](youtube/HELP.MD) 文档。
+> YouTube verification is currently in beta status. Please carefully read [`youtube/HELP.MD`](youtube/HELP.MD) before use.
 > 
-> **主要区别**：
-> - YouTube 的原始链接格式与其他服务不同
-> - 需要手动从浏览器网络日志中提取 `programId` 和 `verificationId`
-> - 然后手动组成标准的 SheerID 链接格式
+> **Key Differences**:
+> - YouTube's original link format differs from other services
+> - Requires manual extraction of `programId` and `verificationId` from browser network logs
+> - Must manually construct standard SheerID link format
 > 
-> **使用步骤**：
-> 1. 访问 YouTube Premium 学生认证页面
-> 2. 打开浏览器开发者工具（F12）→ 网络（Network）标签
-> 3. 开始认证流程，搜索 `https://services.sheerid.com/rest/v2/verification/`
-> 4. 从请求载荷中获取 `programId`，从响应中获取 `verificationId`
-> 5. 手动组成链接：`https://services.sheerid.com/verify/{programId}/?verificationId={verificationId}`
-> 6. 使用 `/verify5` 命令提交该链接
+> **Usage Steps**:
+> 1. Visit YouTube Premium student verification page
+> 2. Open browser DevTools (F12) → Network tab
+> 3. Start verification process, search for `https://services.sheerid.com/rest/v2/verification/`
+> 4. Extract `programId` from request payload and `verificationId` from response
+> 5. Manually construct link: `https://services.sheerid.com/verify/{programId}/?verificationId={verificationId}`
+> 6. Submit the link using `/verify5` command
 
-> **💡 ChatGPT 军人认证思路**：
+> **💡 ChatGPT Military Verification Approach**:
 > 
-> 本项目提供了 ChatGPT 军人 SheerID 认证的实现思路和接口文档。军人认证流程与普通学生/教师认证不同，需要先执行 `collectMilitaryStatus` 接口设置军人状态，然后再提交个人信息表单。详细实现思路和接口说明请查看 [`military/README.md`](military/README.md) 文档。用户可根据该文档自行集成到机器人中。
+> This project provides implementation approach and API documentation for ChatGPT Military SheerID verification. The military verification process differs from regular student/teacher verification, requiring an initial `collectMilitaryStatus` API call to set military status before submitting personal information. For detailed implementation approach and API documentation, please refer to [`military/README.md`](military/README.md). Users can integrate this into the bot based on the documentation.
 
-### ✨ 核心功能
+### ✨ Key Features
 
-- 🚀 **自动化流程**：一键完成信息生成、文档创建、认证提交
-- 🎨 **智能生成**：自动生成学生证/教师证 PNG 图片
-- 💰 **积分系统**：签到、邀请、卡密兑换等多种获取方式
-- 🔐 **安全可靠**：使用 MySQL 数据库，支持环境变量配置
-- ⚡ **并发控制**：智能管理并发请求，确保稳定性
-- 👥 **管理功能**：完善的用户管理和积分管理系统
+- 🚀 **Automated Process**: One-click completion of info generation, document creation, and submission
+- 🎨 **Smart Generation**: Auto-generates student/teacher ID PNG images
+- 💰 **Points System**: Multiple earning methods including check-ins, invitations, and redemption codes
+- 🔐 **Secure & Reliable**: MySQL database with environment variable configuration
+- ⚡ **Concurrency Control**: Intelligent management of concurrent requests for stability
+- 👥 **Admin Features**: Complete user and points management system
 
 ---
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-- **语言**：Python 3.11+
-- **Bot框架**：python-telegram-bot 20.0+
-- **数据库**：MySQL 5.7+
-- **浏览器自动化**：Playwright
-- **HTTP客户端**：httpx
-- **图像处理**：Pillow, reportlab, xhtml2pdf
-- **环境管理**：python-dotenv
+- **Language**: Python 3.11+
+- **Bot Framework**: python-telegram-bot 20.0+
+- **Database**: MySQL 5.7+
+- **Browser Automation**: Playwright
+- **HTTP Client**: httpx
+- **Image Processing**: Pillow, reportlab, xhtml2pdf
+- **Environment Management**: python-dotenv
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 克隆项目
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/PastKing/tgbot-verify.git
 cd tgbot-verify
 ```
 
-### 2. 安装依赖
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-### 3. 配置环境变量
+### 3. Configure Environment Variables
 
-复制 `env.example` 为 `.env` 并填写配置：
+Copy `env.example` to `.env` and fill in the configuration:
 
 ```env
-# Telegram Bot 配置
+# Telegram Bot Configuration
 BOT_TOKEN=your_bot_token_here
 CHANNEL_USERNAME=your_channel
 CHANNEL_URL=https://t.me/your_channel
 ADMIN_USER_ID=your_admin_id
 
-# MySQL 数据库配置
+# MySQL Database Configuration
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_USER=root
@@ -109,7 +109,7 @@ MYSQL_PASSWORD=your_password
 MYSQL_DATABASE=tgbot_verify
 ```
 
-### 4. 启动机器人
+### 4. Start Bot
 
 ```bash
 python bot.py
@@ -117,29 +117,29 @@ python bot.py
 
 ---
 
-## 🐳 Docker 部署
+## 🐳 Docker Deployment
 
-### 使用 Docker Compose（推荐）
+### Using Docker Compose (Recommended)
 
 ```bash
-# 1. 修改 .env 文件配置
+# 1. Configure .env file
 cp env.example .env
 nano .env
 
-# 2. 启动服务
+# 2. Start services
 docker-compose up -d
 
-# 3. 查看日志
+# 3. View logs
 docker-compose logs -f
 ```
 
-### 手动 Docker 部署
+### Manual Docker Deployment
 
 ```bash
-# 构建镜像
+# Build image
 docker build -t tgbot-verify .
 
-# 运行容器
+# Run container
 docker run -d \
   --name tgbot-verify \
   --env-file .env \
@@ -149,176 +149,176 @@ docker run -d \
 
 ---
 
-## 📖 使用说明
+## 📖 Usage
 
-### 用户命令
-
-```bash
-/start              # 开始使用（注册）
-/about              # 了解机器人功能
-/balance            # 查看积分余额
-/qd                 # 每日签到（+1积分）
-/invite             # 生成邀请链接（+2积分/人）
-/use <卡密>         # 使用卡密兑换积分
-/verify <链接>      # Gemini One Pro 认证
-/verify2 <链接>     # ChatGPT Teacher K12 认证
-/verify3 <链接>     # Spotify Student 认证
-/verify4 <链接>     # Bolt.new Teacher 认证
-/verify5 <链接>     # YouTube Premium Student 认证
-/getV4Code <id>     # 获取 Bolt.new 认证码
-/help               # 查看帮助信息
-```
-
-### 管理员命令
+### User Commands
 
 ```bash
-/addbalance <用户ID> <积分>     # 增加用户积分
-/block <用户ID>                 # 拉黑用户
-/white <用户ID>                 # 取消拉黑
-/blacklist                      # 查看黑名单
-/genkey <卡密> <积分> [次数] [天数]  # 生成卡密
-/listkeys                       # 查看卡密列表
-/broadcast <文本>               # 群发通知
+/start              # Start using (register)
+/about              # Learn about bot features
+/balance            # Check points balance
+/qd                 # Daily check-in (+1 point)
+/invite             # Generate invitation link (+2 points per person)
+/use <code>         # Redeem points with code
+/verify <link>      # Gemini One Pro verification
+/verify2 <link>     # ChatGPT Teacher K12 verification
+/verify3 <link>     # Spotify Student verification
+/verify4 <link>     # Bolt.new Teacher verification
+/verify5 <link>     # YouTube Premium Student verification
+/getV4Code <id>     # Get Bolt.new verification code
+/help               # View help information
 ```
 
-### 使用流程
+### Admin Commands
 
-1. **获取认证链接**
-   - 访问对应服务的认证页面
-   - 开始认证流程
-   - 复制浏览器地址栏中的完整 URL（包含 `verificationId`）
+```bash
+/addbalance <user_id> <points>           # Add user points
+/block <user_id>                         # Block user
+/white <user_id>                         # Unblock user
+/blacklist                               # View blacklist
+/genkey <code> <points> [times] [days]   # Generate redemption code
+/listkeys                                # View redemption code list
+/broadcast <text>                        # Broadcast notification
+```
 
-2. **提交认证请求**
+### Verification Process
+
+1. **Get Verification Link**
+   - Visit the corresponding service's verification page
+   - Start the verification process
+   - Copy the full URL from browser address bar (including `verificationId`)
+
+2. **Submit Verification Request**
    ```
    /verify3 https://services.sheerid.com/verify/xxx/?verificationId=yyy
    ```
 
-3. **等待处理**
-   - 机器人自动生成身份信息
-   - 创建学生证/教师证图片
-   - 提交到 SheerID 平台
+3. **Wait for Processing**
+   - Bot automatically generates identity information
+   - Creates student/teacher ID image
+   - Submits to SheerID platform
 
-4. **获取结果**
-   - 审核通常在几分钟内完成
-   - 成功后会返回跳转链接
+4. **Get Results**
+   - Review usually completes within minutes
+   - Success returns redirect link
 
 ---
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 tgbot-verify/
-├── bot.py                  # 机器人主程序
-├── config.py               # 全局配置
-├── database_mysql.py       # MySQL 数据库管理
-├── .env                    # 环境变量配置（需自行创建）
-├── env.example             # 环境变量模板
-├── requirements.txt        # Python 依赖
-├── Dockerfile              # Docker 镜像构建
-├── docker-compose.yml      # Docker Compose 配置
-├── handlers/               # 命令处理器
-│   ├── user_commands.py    # 用户命令
-│   ├── admin_commands.py   # 管理员命令
-│   └── verify_commands.py  # 认证命令
-├── one/                    # Gemini One Pro 认证模块
-├── k12/                    # ChatGPT K12 认证模块
-├── spotify/                # Spotify Student 认证模块
-├── youtube/                # YouTube Premium 认证模块
-├── Boltnew/                # Bolt.new 认证模块
-├── military/               # ChatGPT 军人认证思路文档
-└── utils/                  # 工具函数
-    ├── messages.py         # 消息模板
-    ├── concurrency.py      # 并发控制
-    └── checks.py           # 权限检查
+├── bot.py                  # Main bot program
+├── config.py               # Global configuration
+├── database_mysql.py       # MySQL database management
+├── .env                    # Environment variables (create yourself)
+├── env.example             # Environment variables template
+├── requirements.txt        # Python dependencies
+├── Dockerfile              # Docker image build
+├── docker-compose.yml      # Docker Compose configuration
+├── handlers/               # Command handlers
+│   ├── user_commands.py    # User commands
+│   ├── admin_commands.py   # Admin commands
+│   └── verify_commands.py  # Verification commands
+├── one/                    # Gemini One Pro verification module
+├── k12/                    # ChatGPT K12 verification module
+├── spotify/                # Spotify Student verification module
+├── youtube/                # YouTube Premium verification module
+├── Boltnew/                # Bolt.new verification module
+├── military/               # ChatGPT Military verification approach documentation
+└── utils/                  # Utility functions
+    ├── messages.py         # Message templates
+    ├── concurrency.py      # Concurrency control
+    └── checks.py           # Permission checks
 ```
 
 ---
 
-## ⚙️ 配置说明
+## ⚙️ Configuration
 
-### 环境变量
+### Environment Variables
 
-| 变量名 | 必填 | 说明 | 默认值 |
-|--------|------|------|--------|
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
 | `BOT_TOKEN` | ✅ | Telegram Bot Token | - |
-| `CHANNEL_USERNAME` | ❌ | 频道用户名 | pk_oa |
-| `CHANNEL_URL` | ❌ | 频道链接 | https://t.me/pk_oa |
-| `ADMIN_USER_ID` | ✅ | 管理员 Telegram ID | - |
-| `MYSQL_HOST` | ✅ | MySQL 主机地址 | localhost |
-| `MYSQL_PORT` | ❌ | MySQL 端口 | 3306 |
-| `MYSQL_USER` | ✅ | MySQL 用户名 | - |
-| `MYSQL_PASSWORD` | ✅ | MySQL 密码 | - |
-| `MYSQL_DATABASE` | ✅ | 数据库名称 | tgbot_verify |
+| `CHANNEL_USERNAME` | ❌ | Channel username | pk_oa |
+| `CHANNEL_URL` | ❌ | Channel link | https://t.me/pk_oa |
+| `ADMIN_USER_ID` | ✅ | Admin Telegram ID | - |
+| `MYSQL_HOST` | ✅ | MySQL host address | localhost |
+| `MYSQL_PORT` | ❌ | MySQL port | 3306 |
+| `MYSQL_USER` | ✅ | MySQL username | - |
+| `MYSQL_PASSWORD` | ✅ | MySQL password | - |
+| `MYSQL_DATABASE` | ✅ | Database name | tgbot_verify |
 
-### 积分配置
+### Points Configuration
 
-在 `config.py` 中可以自定义积分规则：
+Customize point rules in `config.py`:
 
 ```python
-VERIFY_COST = 1        # 验证消耗的积分
-CHECKIN_REWARD = 1     # 签到奖励积分
-INVITE_REWARD = 2      # 邀请奖励积分
-REGISTER_REWARD = 1    # 注册奖励积分
+VERIFY_COST = 1        # Points cost for verification
+CHECKIN_REWARD = 1     # Check-in reward points
+INVITE_REWARD = 2      # Invitation reward points
+REGISTER_REWARD = 1    # Registration reward points
 ```
 
 ---
 
-## ⚠️ 重要说明
+## ⚠️ Important Notes
 
-### 🔴 使用前必读
+### 🔴 Must Read Before Use
 
-**在使用机器人之前，请务必检查并更新各模块的验证配置！**
+**Before using the bot, please check and update verification configurations in each module!**
 
-由于 SheerID 平台的 `programId` 可能会定期更新，以下服务在使用前**必须**更新配置文件中的验证资料：
+Since SheerID platform's `programId` may be updated periodically, the following services **must** update verification data in their configuration files before use:
 
-- `one/config.py` - **Gemini One Pro** 认证（需更新 `PROGRAM_ID`）
-- `k12/config.py` - **ChatGPT Teacher K12** 认证（需更新 `PROGRAM_ID`）
-- `spotify/config.py` - **Spotify Student** 认证（需更新 `PROGRAM_ID`）
-- `youtube/config.py` - **YouTube Premium Student** 认证（需更新 `PROGRAM_ID`）
-- `Boltnew/config.py` - Bolt.new Teacher 认证（建议检查 `PROGRAM_ID`）
+- `one/config.py` - **Gemini One Pro** verification (update `PROGRAM_ID`)
+- `k12/config.py` - **ChatGPT Teacher K12** verification (update `PROGRAM_ID`)
+- `spotify/config.py` - **Spotify Student** verification (update `PROGRAM_ID`)
+- `youtube/config.py` - **YouTube Premium Student** verification (update `PROGRAM_ID`)
+- `Boltnew/config.py` - Bolt.new Teacher verification (recommended to check `PROGRAM_ID`)
 
-**如何获取最新的 programId**：
-1. 访问对应服务的认证页面
-2. 打开浏览器开发者工具（F12）→ 网络（Network）标签
-3. 开始认证流程
-4. 查找 `https://services.sheerid.com/rest/v2/verification/` 请求
-5. 从 URL 或请求载荷中提取 `programId`
-6. 更新对应模块的 `config.py` 文件
+**How to get the latest programId**:
+1. Visit the corresponding service's verification page
+2. Open browser DevTools (F12) → Network tab
+3. Start the verification process
+4. Look for `https://services.sheerid.com/rest/v2/verification/` requests
+5. Extract `programId` from URL or request payload
+6. Update the corresponding module's `config.py` file
 
-> **提示**：如果认证一直失败，很可能是 `programId` 已过期，请按上述步骤更新。
-
----
-
-## 🔗 相关链接
-
-- 📺 **Telegram 频道**：https://t.me/pk_oa
-- 🐛 **问题反馈**：[GitHub Issues](https://github.com/PastKing/tgbot-verify/issues)
-- 📖 **部署文档**：[DEPLOY.md](DEPLOY.md)
+> **Tip**: If verification keeps failing, the `programId` is likely outdated. Please update it following the steps above.
 
 ---
 
-## 🤝 二次开发
+## 🔗 Links
 
-欢迎进行二次开发！但请遵守以下规则：
-
-1. **保留原作者信息**
-   - 在代码和文档中保留原仓库地址
-   - 注明基于本项目进行的二次开发
-
-2. **开源协议**
-   - 本项目采用 MIT 开源协议
-   - 二次开发的项目也必须开源
-
-3. **商业使用**
-   - 个人使用免费
-   - 商业使用请自行优化并承担责任
-   - 不提供任何技术支持和担保
+- 📺 **Telegram Channel**: https://t.me/pk_oa
+- 🐛 **Issue Tracking**: [GitHub Issues](https://github.com/PastKing/tgbot-verify/issues)
+- 📖 **Deployment Guide**: [DEPLOY.md](DEPLOY.md)
 
 ---
 
-## 📜 开源协议
+## 🤝 Secondary Development
 
-本项目采用 [MIT License](LICENSE) 开源协议。
+Secondary development is welcome! Please follow these rules:
+
+1. **Preserve Original Author Info**
+   - Keep original repository address in code and documentation
+   - Note that it's based on this project
+
+2. **Open Source License**
+   - This project uses MIT License
+   - Secondary development projects must also be open source
+
+3. **Commercial Use**
+   - Free for personal use
+   - Commercial use requires self-optimization and liability
+   - No technical support or warranty provided
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ```
 MIT License
@@ -332,38 +332,38 @@ in the Software without restriction...
 
 ---
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-- 感谢 [@auto_sheerid_bot](https://t.me/auto_sheerid_bot) GGBond 提供的旧版代码基础
-- 感谢所有为本项目做出贡献的开发者
-- 感谢 SheerID 平台提供的认证服务
+- Thanks to [@auto_sheerid_bot](https://t.me/auto_sheerid_bot) GGBond for the legacy code foundation
+- Thanks to all developers who contributed to this project
+- Thanks to SheerID platform for providing verification services
 
 ---
 
-## 📊 项目统计
+## 📊 Statistics
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PastKing/tgbot-verify&type=Date)](https://star-history.com/#PastKing/tgbot-verify&Date)
 
 ---
 
-## 📝 更新日志
+## 📝 Changelog
 
 ### v2.0.0 (2025-01-12)
 
-- ✨ 新增 Spotify Student 和 YouTube Premium Student 认证（YouTube 为半成品，需参考 youtube/HELP.MD 使用）
-- 🚀 优化并发控制和性能
-- 📝 完善文档和部署指南
-- 🐛 修复已知 BUG
+- ✨ Added Spotify Student and YouTube Premium Student verification (YouTube is in beta, see youtube/HELP.MD)
+- 🚀 Optimized concurrency control and performance
+- 📝 Improved documentation and deployment guide
+- 🐛 Fixed known bugs
 
 ### v1.0.0
 
-- 🎉 初始版本发布
-- ✅ 支持 Gemini、ChatGPT、Bolt.new 认证
+- 🎉 Initial release
+- ✅ Support for Gemini, ChatGPT, Bolt.new verification
 
 ---
 
 <p align="center">
-  <strong>⭐ 如果这个项目对你有帮助，请给个 Star 支持一下！</strong>
+  <strong>⭐ If this project helps you, please give it a Star!</strong>
 </p>
 
 <p align="center">

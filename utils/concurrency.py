@@ -59,19 +59,19 @@ def get_verification_semaphore(verification_type: str) -> asyncio.Semaphore:
     """Get semaphore for specified verification type
     
     Args:
-        verification_type: 验证类型
+        verification_type: Verification type
         
     Returns:
-        asyncio.Semaphore: 对应的信号量
+        asyncio.Semaphore: Corresponding semaphore
     """
     semaphore = _verification_semaphores.get(verification_type)
     
     if semaphore is None:
-        # 未知类型，创建默认信号量
+        # Unknown type, create default semaphore
         semaphore = asyncio.Semaphore(_base_concurrency // 3)
         _verification_semaphores[verification_type] = semaphore
         logger.info(
-            f"为新验证类型 {verification_type} 创建信号量: "
+            f"Created semaphore for new verification type {verification_type}: "
             f"limit={_base_concurrency // 3}"
         )
     
@@ -79,14 +79,14 @@ def get_verification_semaphore(verification_type: str) -> asyncio.Semaphore:
 
 
 def get_concurrency_stats() -> Dict[str, Dict[str, int]]:
-    """获取并发统计信息
+    """Get concurrency statistics
     
     Returns:
-        dict: 各验证类型的并发信息
+        dict: Concurrency information for each verification type
     """
     stats = {}
     for vtype, semaphore in _verification_semaphores.items():
-        # 注意：_value 是内部属性，可能在不同 Python 版本中变化
+        # Note: _value is an internal attribute and may change in different Python versions
         try:
             available = semaphore._value if hasattr(semaphore, '_value') else 0
             limit = _base_concurrency // 3

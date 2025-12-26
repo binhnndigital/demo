@@ -302,25 +302,25 @@ async def verify4_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         return
 
     processing_msg = await update.message.reply_text(
-        f"🚀 开始处理 Bolt.new Teacher 认证...\n"
+        f"🚀 Starting Bolt.new Teacher verification...\n"
         f"Deducted {VERIFY_COST} points\n\n"
-        "📤 正在提交文档..."
+        "📤 Submitting documents..."
     )
 
-    # 使用信号量控制并发
+    # Use semaphore to control concurrency
     semaphore = get_verification_semaphore("bolt_teacher")
 
     try:
         async with semaphore:
-            # 第1步：提交文档
+            # Step 1: Submit documents
             verifier = BoltnewVerifier(url, verification_id=verification_id)
             result = await asyncio.to_thread(verifier.verify)
 
         if not result.get("success"):
-            # 提交失败，退款
+            # Submission failed, refund
             db.add_balance(user_id, VERIFY_COST)
             await processing_msg.edit_text(
-                f"❌ 文档提交失败：{result.get('message', 'Unknown error')}\n\n"
+                f"❌ Document submission failed: {result.get('message', 'Unknown error')}\n\n"
                 f"Refunded {VERIFY_COST} points"
             )
             return
@@ -329,37 +329,37 @@ async def verify4_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
         if not vid:
             db.add_balance(user_id, VERIFY_COST)
             await processing_msg.edit_text(
-                f"❌ 未获取到Verification ID\n\n"
+                f"❌ Failed to obtain Verification ID\n\n"
                 f"Refunded {VERIFY_COST} points"
             )
             return
         
-        # 更新消息
+        # Update message
         await processing_msg.edit_text(
-            f"✅ 文档已提交！\n"
+            f"✅ Documents submitted!\n"
             f"📋 Verification ID: `{vid}`\n\n"
-            f"🔍 正在自动获取认证码...\n"
-            f"（最多等待20 seconds）"
+            f"🔍 Auto-retrieving verification code...\n"
+            f"(waiting up to 20 seconds)"
         )
         
-        # 第2步：自动获取认证码（最多20 seconds）
+        # Step 2: Auto-retrieve verification code (up to 20 seconds)
         code = await _auto_get_reward_code(vid, max_wait=20, interval=5)
         
         if code:
-            # 成功获取
+            # Successfully retrieved
             result_msg = (
-                f"🎉 认证成功！\n\n"
-                f"✅ 文档已提交\n"
-                f"✅ 审核已通过\n"
-                f"✅ 认证码已获取\n\n"
-                f"🎁 认证码: `{code}`\n"
+                f"🎉 Verification successful!\n\n"
+                f"✅ Documents submitted\n"
+                f"✅ Review passed\n"
+                f"✅ Verification code retrieved\n\n"
+                f"🎁 Verification code: `{code}`\n"
             )
             if result.get("redirect_url"):
-                result_msg += f"\n🔗 跳转链接:\n{result['redirect_url']}"
+                result_msg += f"\n🔗 Redirect link:\n{result['redirect_url']}"
             
             await processing_msg.edit_text(result_msg)
             
-            # 保存成功记录
+            # Save success record
             db.add_verification(
                 user_id,
                 "bolt_teacher",
@@ -369,14 +369,14 @@ async def verify4_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db
                 vid
             )
         else:
-            # 20 seconds内未获取到，让用户稍后查询
+            # Not retrieved within 20 seconds, let user query later
             await processing_msg.edit_text(
-                f"✅ 文档已提交成功！\n\n"
-                f"⏳ 认证码尚未生成（可能需要1-5分钟审核）\n\n"
+                f"✅ Documents submitted successfully!\n\n"
+                f"⏳ Verification code not yet generated (may take 1-5 minutes for review)\n\n"
                 f"📋 Verification ID: `{vid}`\n\n"
-                f"💡 请稍后使用以下命令查询:\n"
+                f"💡 Please query later using:\n"
                 f"`/getV4Code {vid}`\n\n"
-                f"注意：points已消耗，稍后查询无需再付费"
+                f"Note: points have been consumed, no additional fee for later queries"
             )
             
             # 保存待处理记录
@@ -403,15 +403,15 @@ async def _auto_get_reward_code(
     max_wait: int = 20,
     interval: int = 5
 ) -> Optional[str]:
-    """Auto-retrieve认证码（轻量级轮询，不影响并发）
+    """Auto-retrieve verification code (lightweight polling, no impact on concurrency)
     
     Args:
         verification_id: Verification ID
-        max_wait: 最大等待时间（ seconds）
-        interval: 轮询间隔（ seconds）
+        max_wait: Maximum wait time (seconds)
+        interval: Polling interval (seconds)
         
     Returns:
-        str: 认证码，如果获取失败返回None
+        str: Verification code, returns None if retrieval fails
     """
     import time
     start_time = time.time()
@@ -422,13 +422,13 @@ async def _auto_get_reward_code(
             elapsed = int(time.time() - start_time)
             attempts += 1
             
-            # 检查是否超时
+            # Check if timeout
             if elapsed >= max_wait:
-                logger.info(f"Auto-retrievecode超时({elapsed} seconds), let user query manually")
+                logger.info(f"Auto-retrieve code timeout ({elapsed} seconds), let user query manually")
                 return None
             
             try:
-                # 查询验证状态
+                # Query verification status
                 response = await client.get(
                     f"https://my.sheerid.com/rest/v2/verification/{verification_id}"
                 )
@@ -438,18 +438,18 @@ async def _auto_get_reward_code(
                     current_step = data.get("currentStep")
                     
                     if current_step == "success":
-                        # 获取认证码
+                        # Get verification code
                         code = data.get("rewardCode") or data.get("rewardData", {}).get("rewardCode")
                         if code:
-                            logger.info(f"✅ Auto-retrieve code successful: {code} (time taken{elapsed} seconds)")
+                            logger.info(f"✅ Auto-retrieve code successful: {code} (time taken {elapsed} seconds)")
                             return code
                     elif current_step == "error":
                         # Review failed
                         logger.warning(f"Review failed: {data.get('errorIds', [])}")
                         return None
-                    # else: pending，继续等待
+                    # else: pending, continue waiting
                 
-                # 等待下次轮询
+                # Wait for next poll
                 await asyncio.sleep(interval)
                 
             except Exception as e:
